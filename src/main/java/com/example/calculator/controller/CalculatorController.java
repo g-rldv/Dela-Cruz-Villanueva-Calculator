@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -103,14 +102,50 @@ public class CalculatorController {
     }
 
     private double evaluateExpression(String input) {
+        String normalized = normalizeExpression(input);
+        List<String> tokens = tokenize(normalized);
+        if (tokens.isEmpty()) {
+            return 0.0;
+        }
+        Parser parser = new Parser(tokens);
+        return parser.parseExpression();
+    }
+
+    private String normalizeExpression(String input) {
         String sanitized = input.replace("×", "*")
                                 .replace("÷", "/")
                                 .replace("−", "-")
                                 .replaceAll("\\s+", "");
 
-        List<String> tokens = tokenize(sanitized);
-        Parser parser = new Parser(tokens);
-        return parser.parseExpression();
+        sanitized = sanitized.replaceAll("[+\\-*/]+$", "");
+
+        StringBuilder clean = new StringBuilder();
+        int depth = 0;
+        for (int i = 0; i < sanitized.length(); i++) {
+            char c = sanitized.charAt(i);
+            if (c == '(') {
+                depth++;
+                clean.append(c);
+            } else if (c == ')') {
+                if (depth > 0) {
+                    depth--;
+                    clean.append(c);
+                }
+            } else {
+                clean.append(c);
+            }
+        }
+        while (depth > 0) {
+            clean.append(')');
+            depth--;
+        }
+
+        String result = clean.toString();
+        result = result.replaceAll("([0-9.]|%)\\(", "$1*(");
+        result = result.replaceAll("\\)([0-9.(])", ")*$1");
+        result = result.replaceAll("%([0-9.])", "%*$1");
+
+        return result;
     }
 
     private List<String> tokenize(String expr) {
@@ -185,6 +220,8 @@ public class CalculatorController {
                         throw new ArithmeticException("Cannot divide by zero");
                     }
                     result /= divisor;
+                } else if ("(".equals(token) || (token != null && !token.isEmpty() && (Character.isDigit(token.charAt(0)) || token.charAt(0) == '.'))) {
+                    result *= parseFactor();
                 } else {
                     break;
                 }
@@ -196,7 +233,7 @@ public class CalculatorController {
             double factor;
             String token = peek();
             if (token == null) {
-                throw new IllegalArgumentException("Unexpected end of expression");
+                return 0.0;
             }
 
             if ("+".equals(token)) {
@@ -208,8 +245,8 @@ public class CalculatorController {
             } else if ("(".equals(token)) {
                 consume();
                 factor = parseExpression();
-                if (!")".equals(consume())) {
-                    throw new IllegalArgumentException("Mismatched parentheses");
+                if (pos < tokens.size() && ")".equals(peek())) {
+                    consume();
                 }
             } else {
                 consume();

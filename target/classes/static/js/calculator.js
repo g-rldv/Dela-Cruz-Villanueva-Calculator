@@ -87,9 +87,60 @@ document.addEventListener('DOMContentLoaded', () => {
         updateDisplay();
     }
 
+    function autoCloseParentheses(expr) {
+        let openCount = 0;
+        let closeCount = 0;
+        for (const char of expr) {
+            if (char === '(') openCount++;
+            else if (char === ')') closeCount++;
+        }
+        if (openCount > closeCount) {
+            return expr + ')'.repeat(openCount - closeCount);
+        }
+        return expr;
+    }
+
+    function normalizeExpression(expr) {
+        let sanitized = expr
+            .replace(/×/g, '*')
+            .replace(/÷/g, '/')
+            .replace(/−/g, '-')
+            .replace(/\s+/g, '');
+
+        sanitized = sanitized.replace(/[\+\-\*\/]+$/, '');
+
+        let clean = '';
+        let depth = 0;
+        for (const char of sanitized) {
+            if (char === '(') {
+                depth++;
+                clean += char;
+            } else if (char === ')') {
+                if (depth > 0) {
+                    depth--;
+                    clean += char;
+                }
+            } else {
+                clean += char;
+            }
+        }
+        while (depth > 0) {
+            clean += ')';
+            depth--;
+        }
+
+        let result = clean;
+        result = result.replace(/([\d\.]|\%)\(/g, '$1*(');
+        result = result.replace(/\)([\d\.\(])/g, ')*$1');
+        result = result.replace(/\%([\d\.])/g, '%*$1');
+
+        return result;
+    }
+
     async function evaluate() {
         if (isCalculated) return;
-        const exprToEval = currentExpression;
+        const closedExpr = autoCloseParentheses(currentExpression);
+        const exprToEval = closedExpr;
 
         try {
             const response = await fetch('/api/calculate', {
@@ -123,10 +174,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function fallbackEvaluate(expr) {
         try {
-            const sanitized = expr
-                .replace(/×/g, '*')
-                .replace(/÷/g, '/')
-                .replace(/−/g, '-')
+            const normalized = normalizeExpression(expr);
+            const sanitized = normalized
                 .replace(/(\d+(\.\d+)?)%/g, '($1/100)');
 
             if (!/^[\d\.\+\-\*\/\(\)\s]+$/.test(sanitized)) {
@@ -144,7 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const rounded = Math.round(rawResult * 1e10) / 1e10;
             const resStr = String(rounded);
-            previousExpression = `${expr} =`;
+            previousExpression = `${autoCloseParentheses(expr)} =`;
             currentExpression = resStr;
             lastEvaluatedResult = resStr;
             lastEvaluatedFraction = computeFraction(rounded);
