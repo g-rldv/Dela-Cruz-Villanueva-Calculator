@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dela Cruz - Villanueva Calculator</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/js/calculator.js" defer></script>
+</head>
+<body>
+    <main class="calculator-app">
+        <header class="brand-header">
+            <span class="brand-title">Dela Cruz - Villanueva Calculator</span>
+        </header>
+        <section class="display-container" aria-label="Calculator Display">
+            <div id="history-display" class="history-line"></div>
+            <div id="fraction-display" class="fraction-badge"></div>
+            <div id="main-display" class="main-line" aria-live="polite">0</div>
+        </section>
+        <section class="keypad-grid" aria-label="Calculator Keypad">
+            <button type="button" class="calc-btn btn-teal" data-action="clear" id="btn-ac">AC</button>
+            <button type="button" class="calc-btn btn-teal btn-fraction" data-action="fraction" id="btn-fraction">a/b</button>
+            <button type="button" class="calc-btn btn-teal" data-action="delete" id="btn-del">⌫</button>
+            <button type="button" class="calc-btn btn-teal" data-value="÷" id="btn-div">÷</button>
+
+            <button type="button" class="calc-btn btn-teal" data-value="(" id="btn-open-paren">(</button>
+            <button type="button" class="calc-btn btn-teal" data-value=")" id="btn-close-paren">)</button>
+            <button type="button" class="calc-btn btn-teal" data-value="%" id="btn-pct">%</button>
+            <button type="button" class="calc-btn btn-teal" data-value="×" id="btn-mul">×</button>
+
+            <button type="button" class="calc-btn btn-num" data-value="7" id="btn-7">7</button>
+            <button type="button" class="calc-btn btn-num" data-value="8" id="btn-8">8</button>
+            <button type="button" class="calc-btn btn-num" data-value="9" id="btn-9">9</button>
+            <button type="button" class="calc-btn btn-teal" data-value="-" id="btn-sub">-</button>
+
+            <button type="button" class="calc-btn btn-num" data-value="4" id="btn-4">4</button>
+            <button type="button" class="calc-btn btn-num" data-value="5" id="btn-5">5</button>
+            <button type="button" class="calc-btn btn-num" data-value="6" id="btn-6">6</button>
+            <button type="button" class="calc-btn btn-teal" data-value="+" id="btn-add">+</button>
+
+            <button type="button" class="calc-btn btn-num" data-value="1" id="btn-1">1</button>
+            <button type="button" class="calc-btn btn-num" data-value="2" id="btn-2">2</button>
+            <button type="button" class="calc-btn btn-num" data-value="3" id="btn-3">3</button>
+            <button type="button" class="calc-btn btn-orange btn-equals" data-action="calculate" id="btn-equals">=</button>
+
+            <button type="button" class="calc-btn btn-num btn-zero" data-value="0" id="btn-0">0</button>
+            <button type="button" class="calc-btn btn-num" data-value="." id="btn-dot">.</button>
+        </section>
+    </main>
+</body>
+</html>
